@@ -8,7 +8,6 @@ const adminModule = require('./modules/admin');
 const messagesModule = require('./modules/messages');
 const featuresModule = require('./modules/features');
 
-// Typing effect title
 console.log(chalk.red(figlet.textSync('PRO X USMAN', { horizontalLayout: 'full' })));
 
 const rl = readline.createInterface({
@@ -16,10 +15,22 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
+// Function to enter pairing code manually
+async function getPairingCode() {
+    return new Promise((resolve) => {
+        rl.question(chalk.yellow('Enter your PAIRING CODE: '), (code) => {
+            resolve(code);
+        });
+    });
+}
+
 async function startBot() {
+    // Get pairing code manually first
+    const pairingCode = await getPairingCode();
+
     const conn = makeWASocket({
         auth: state,
-        printQRInTerminal: true
+        printQRInTerminal: false // QR code nahi show hoga
     });
 
     conn.ev.on('creds.update', saveState);
@@ -33,10 +44,12 @@ async function startBot() {
         }
     });
 
+    // You can now send pairingCode if required by your auth module
+    console.log(chalk.green(`PAIRING CODE used: ${pairingCode}`));
+
     // Load WhatsApp features (500+)
     featuresModule.start(conn);
 
-    // Termux menu
     const menu = `
 1) Check All Messages
 2) Promote Admin
